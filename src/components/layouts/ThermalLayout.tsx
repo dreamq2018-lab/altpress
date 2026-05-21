@@ -55,18 +55,33 @@ const mastTitleStyle: CSSProperties = {
   textOverflow: 'ellipsis',
 }
 
-// 72mm 폭에 한 줄로 들어가도록 글자 수 기반으로 폰트 크기 결정
-// CJK 1.0 / 공백 0.4 / 라틴·숫자 0.55 가중치
-function computeMastFontSize(text: string): number {
-  if (!text) return 26
+// 글자 수·가중치 기반으로 한 줄에 들어가는 폰트 크기를 결정.
+// CJK 1.0 / 공백 0.4 / 라틴·숫자·기호 0.55 가중치.
+function fitFontSize(
+  text: string,
+  base: number,
+  availablePx: number,
+  min: number,
+): number {
+  if (!text) return base
   const visual = Array.from(text).reduce((sum, ch) => {
     if (/\s/.test(ch)) return sum + 0.4
     if (/[一-鿿가-힯぀-ヿ]/.test(ch)) return sum + 1.0
     return sum + 0.55
   }, 0)
-  const AVAILABLE_PX = 240 // 72mm - 양옆 패딩 후 가용 폭 추정
-  const computed = Math.floor((AVAILABLE_PX / visual) * 0.95)
-  return Math.max(12, Math.min(26, computed))
+  if (visual === 0) return base
+  const computed = Math.floor((availablePx / visual) * 0.95)
+  return Math.max(min, Math.min(base, computed))
+}
+
+// 마스트헤드 — 72mm에서 양옆 패딩 후 가용 ~240px
+function computeMastFontSize(text: string): number {
+  return fitFontSize(text, 26, 240, 12)
+}
+
+// 광고 박스 내부 — 추가로 광고 박스 패딩(좌우 2.5mm) 빼면 ~215px
+function computeAdFontSize(text: string, base: number, min: number): number {
+  return fitFontSize(text, base, 215, min)
 }
 
 const mastSubStyle: CSSProperties = {
@@ -170,12 +185,6 @@ const footerStyle: CSSProperties = {
   marginTop: '1mm',
 }
 
-const qrPlaceholderStyle: CSSProperties = {
-  fontSize: '10px',
-  marginTop: '1mm',
-  letterSpacing: '1px',
-}
-
 const adWrapStyle: CSSProperties = {
   marginTop: '2.5mm',
   border: '1px solid #000',
@@ -197,23 +206,29 @@ const adLabelStyle: CSSProperties = {
 
 const adAdvertiserStyle: CSSProperties = {
   fontFamily: FONT_MYEONGJO,
-  fontSize: '10px',
   fontWeight: 700,
   marginTop: '0.5mm',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 }
 
 const adMessageStyle: CSSProperties = {
-  fontSize: '11px',
   fontWeight: 700,
   lineHeight: 1.35,
   marginTop: '1mm',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 }
 
 const adSubMessageStyle: CSSProperties = {
-  fontSize: '9px',
   color: '#444',
   lineHeight: 1.4,
   marginTop: '0.8mm',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
 }
 
 const tearLineWrapStyle: CSSProperties = {
@@ -319,27 +334,58 @@ export default function ThermalLayout({
         </div>
       )}
 
-      {/* Footer */}
-      <div style={doubleRuleStyle} />
-      <footer style={footerStyle}>
-        <div>www.dasaneobo.kr</div>
-        {qrUrl ? (
-          <div style={{ marginTop: '1.5mm', display: 'flex', justifyContent: 'center' }}>
-            <QRCodeSVG value={qrUrl} size={80} level="M" includeMargin={false} />
-          </div>
-        ) : (
-          <div style={qrPlaceholderStyle}>[QR]</div>
-        )}
-      </footer>
+      {/* Footer — QR이 있을 때만 표시 */}
+      {qrUrl && (
+        <>
+          <div style={doubleRuleStyle} />
+          <footer style={footerStyle}>
+            <div
+              style={{
+                marginTop: '1.5mm',
+                display: 'flex',
+                justifyContent: 'center',
+              }}
+            >
+              <QRCodeSVG
+                value={qrUrl}
+                size={80}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+          </footer>
+        </>
+      )}
 
-      {/* Ad section */}
+      {/* Ad section — 각 줄 자동 축소 */}
       {adData && (
         <div style={adWrapStyle}>
           <span style={adLabelStyle}>광고</span>
-          <div style={adAdvertiserStyle}>{adData.advertiser}</div>
-          <div style={adMessageStyle}>{adData.message}</div>
+          <div
+            style={{
+              ...adAdvertiserStyle,
+              fontSize: `${computeAdFontSize(adData.advertiser, 10, 8)}px`,
+            }}
+          >
+            {adData.advertiser}
+          </div>
+          <div
+            style={{
+              ...adMessageStyle,
+              fontSize: `${computeAdFontSize(adData.message, 11, 8)}px`,
+            }}
+          >
+            {adData.message}
+          </div>
           {adData.sub_message && (
-            <div style={adSubMessageStyle}>{adData.sub_message}</div>
+            <div
+              style={{
+                ...adSubMessageStyle,
+                fontSize: `${computeAdFontSize(adData.sub_message, 9, 7)}px`,
+              }}
+            >
+              {adData.sub_message}
+            </div>
           )}
         </div>
       )}
