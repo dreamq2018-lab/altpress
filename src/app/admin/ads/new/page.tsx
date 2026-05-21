@@ -4,14 +4,13 @@ import { useRouter } from 'next/navigation'
 import AdForm from '@/components/admin/AdForm'
 import AdminShell from '@/components/admin/AdminShell'
 import { insertAd, type AdInput } from '@/lib/ads'
-import { adminUrl } from '@/lib/locations'
 
 export default function NewAdPage() {
   const router = useRouter()
 
   const handleSubmit = async (value: AdInput) => {
     await insertAd(value)
-    router.push(adminUrl('/admin/ads'))
+    router.push('/admin/ads')
   }
 
   return (

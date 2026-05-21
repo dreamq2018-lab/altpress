@@ -12,10 +12,3 @@ export const LOCATIONS: ReadonlyArray<string> = [
 
 // 광고 locations 배열에 이 토큰이 포함되면 모든 지역에서 표시됨
 export const ALL_LOCATIONS_TOKEN = '전체'
-
-export const ADMIN_KEY = 'altpress2026'
-
-export function adminUrl(path: string, params: Record<string, string> = {}): string {
-  const search = new URLSearchParams({ key: ADMIN_KEY, ...params })
-  return `${path}?${search.toString()}`
-}

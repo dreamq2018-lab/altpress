@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import AdForm from '@/components/admin/AdForm'
 import AdminShell from '@/components/admin/AdminShell'
 import { type AdData, type AdInput, getAd, updateAd } from '@/lib/ads'
-import { adminUrl } from '@/lib/locations'
 
 export default function EditAdPage() {
   const router = useRouter()
@@ -23,7 +22,7 @@ export default function EditAdPage() {
 
   const handleSubmit = async (value: AdInput) => {
     await updateAd(id, value)
-    router.push(adminUrl('/admin/ads'))
+    router.push('/admin/ads')
   }
 
   return (

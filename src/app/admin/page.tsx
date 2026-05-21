@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import AdminShell from '@/components/admin/AdminShell'
 import { listAds } from '@/lib/ads'
-import { adminUrl } from '@/lib/locations'
 import { getPrintJobStats } from '@/lib/supabase'
 
 const NAVY = '#1B3A6B'
@@ -103,7 +102,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
       <div style={gridStyle}>
-        <Link href={adminUrl('/admin/ads')} style={cardStyle}>
+        <Link href={"/admin/ads"} style={cardStyle}>
           <div style={cardTitleStyle}>📢 광고 관리</div>
           <div style={{ fontSize: 13, color: '#666' }}>
             관광지별 광고 등록·수정·ON/OFF
@@ -118,7 +117,7 @@ export default function AdminDashboardPage() {
           </div>
         </Link>
 
-        <Link href={adminUrl('/admin/jobs')} style={cardStyle}>
+        <Link href={"/admin/jobs"} style={cardStyle}>
           <div style={cardTitleStyle}>🖨 인쇄 현황</div>
           <div style={{ fontSize: 13, color: '#666' }}>
             최근 인쇄 요청 내역과 통계

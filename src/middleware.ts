@@ -1,32 +1,53 @@
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isAdminEmail } from '@/lib/auth'
 
-const ADMIN_KEY = 'altpress2026'
-const COOKIE_NAME = 'altpress_admin'
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
 
-export function middleware(req: NextRequest) {
-  const { pathname, searchParams } = req.nextUrl
-
+  // /admin/* 외엔 모두 통과
   if (!pathname.startsWith('/admin')) return NextResponse.next()
-
-  // 쿼리에 key가 있으면 통과 + 쿠키 발급 (세션 유지용)
-  const key = searchParams.get('key')
-  if (key === ADMIN_KEY) {
-    const res = NextResponse.next()
-    res.cookies.set(COOKIE_NAME, ADMIN_KEY, {
-      httpOnly: true,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 8, // 8시간
-    })
-    return res
+  // 로그인 페이지 자체는 인증 검사 면제
+  if (pathname === '/admin/login' || pathname.startsWith('/admin/login/')) {
+    return NextResponse.next()
   }
 
-  // 쿠키가 있어도 통과
-  const cookieKey = req.cookies.get(COOKIE_NAME)?.value
-  if (cookieKey === ADMIN_KEY) return NextResponse.next()
+  const res = NextResponse.next({ request: { headers: req.headers } })
 
-  // 둘 다 없으면 홈으로
-  return NextResponse.redirect(new URL('/', req.url))
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) {
+    // Supabase가 설정 안 되어 있으면 로그인 페이지로 보냄
+    return NextResponse.redirect(new URL('/admin/login', req.url))
+  }
+
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      get(name: string) {
+        return req.cookies.get(name)?.value
+      },
+      set(name: string, value: string, options: CookieOptions) {
+        res.cookies.set({ name, value, ...options })
+      },
+      remove(name: string, options: CookieOptions) {
+        res.cookies.set({ name, value: '', ...options })
+      },
+    },
+  })
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user || !isAdminEmail(user.email)) {
+    const loginUrl = new URL('/admin/login', req.url)
+    if (pathname !== '/admin') {
+      loginUrl.searchParams.set('next', pathname)
+    }
+    return NextResponse.redirect(loginUrl)
+  }
+
+  return res
 }
 
 export const config = {

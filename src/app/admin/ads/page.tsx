@@ -10,7 +10,6 @@ import {
   listAds,
   toggleAdActive,
 } from '@/lib/ads'
-import { adminUrl } from '@/lib/locations'
 
 const NAVY = '#1B3A6B'
 
@@ -174,7 +173,7 @@ export default function AdsListPage() {
       )}
 
       <div style={topBarStyle}>
-        <Link href={adminUrl('/admin/ads/new')} style={primaryBtnStyle}>
+        <Link href={"/admin/ads/new"} style={primaryBtnStyle}>
           + 새 광고 등록
         </Link>
       </div>
@@ -229,7 +228,7 @@ export default function AdsListPage() {
                   </td>
                   <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
                     <Link
-                      href={adminUrl(`/admin/ads/${ad.id}/edit`)}
+                      href={`/admin/ads/${ad.id}/edit`}
                       style={actionBtnStyle}
                     >
                       수정
