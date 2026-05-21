@@ -42,7 +42,11 @@ const doubleRuleStyle: CSSProperties = {
 const mastheadStyle: CSSProperties = {
   textAlign: 'center',
   fontFamily: FONT_MYEONGJO,
-  padding: '1mm 0',
+  padding: '8px 6px',
+  background: '#1B3A6B',
+  color: '#FFFFFF',
+  WebkitPrintColorAdjust: 'exact',
+  printColorAdjust: 'exact',
 }
 
 const mastTitleStyle: CSSProperties = {
@@ -50,6 +54,7 @@ const mastTitleStyle: CSSProperties = {
   letterSpacing: '0.5px',
   lineHeight: 1.1,
   margin: 0,
+  color: '#FFFFFF',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -89,6 +94,7 @@ const mastSubStyle: CSSProperties = {
   fontSize: '8px',
   lineHeight: 1.4,
   marginTop: '1.5mm',
+  color: 'rgba(255,255,255,0.92)',
 }
 
 const typeBadgeStyle: CSSProperties = {
@@ -106,8 +112,10 @@ const headlineStyle: CSSProperties = {
   fontSize: '18px',
   fontWeight: 800,
   lineHeight: 1.2,
-  margin: '1mm 0 1.5mm',
+  margin: '1mm 0 6px',
   letterSpacing: '-0.5px',
+  borderBottom: '2.5px solid #000',
+  paddingBottom: '4px',
 }
 
 const subtitleStyle: CSSProperties = {
@@ -136,6 +144,15 @@ const photoCaptionStyle: CSSProperties = {
   fontStyle: 'italic',
 }
 
+const bodyAreaStyle: CSSProperties = {
+  borderTop: '0.5px solid #888',
+  marginTop: '4px',
+  padding: '6px',
+  background: '#F5F5F5',
+  WebkitPrintColorAdjust: 'exact',
+  printColorAdjust: 'exact',
+}
+
 const bodyStyle: CSSProperties = {
   fontFamily: FONT_GOTHIC,
   fontSize: '8.5px',
@@ -146,7 +163,8 @@ const bodyStyle: CSSProperties = {
   columnGap: '6px',
   columnRule: '0.5px solid #000',
   textAlign: 'justify',
-  margin: '4px 0',
+  margin: 0,
+  color: '#000',
 }
 
 const bylineStyle: CSSProperties = {
@@ -271,9 +289,8 @@ export default function ThermalLayout({
 
   return (
     <article className="thermal-layout" style={wrapperStyle}>
-      {/* Masthead */}
-      <div style={doubleRuleStyle} />
-      <header style={mastheadStyle}>
+      {/* Masthead — navy 배경 + 흰 글씨 */}
+      <header className="thermal-masthead" style={mastheadStyle}>
         <h1
           style={{
             ...mastTitleStyle,
@@ -291,31 +308,31 @@ export default function ThermalLayout({
         </div>
         <div style={mastSubStyle}>{location} 현지 취재</div>
       </header>
-      <div style={doubleRuleStyle} />
 
       {/* Type badge */}
       <div style={typeBadgeStyle}>▶ {typeLabel}</div>
 
-      {/* Headline */}
+      {/* Headline — 아래 굵은 검정 선 (border-bottom) */}
       <h2 style={headlineStyle}>{headline}</h2>
-      <hr style={hrThin} />
 
       {/* Subtitle */}
       <p style={subtitleStyle}>{subtitle}</p>
 
-      {/* Main photo */}
-      {mainPhoto && (
-        <figure style={mainPhotoWrapStyle}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={mainPhoto} alt="" style={mainPhotoStyle} />
-          <figcaption style={photoCaptionStyle}>
-            {location}에서 {authorName}
-          </figcaption>
-        </figure>
-      )}
+      {/* Body area — 회색 배경 + 얇은 회색 상단 선 */}
+      <div className="thermal-body-area" style={bodyAreaStyle}>
+        {mainPhoto && (
+          <figure style={mainPhotoWrapStyle}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mainPhoto} alt="" style={mainPhotoStyle} />
+            <figcaption style={photoCaptionStyle}>
+              {location}에서 {authorName}
+            </figcaption>
+          </figure>
+        )}
 
-      {/* Body — 2-column */}
-      <div style={bodyStyle}>{body}</div>
+        {/* Body — 2-column */}
+        <div style={bodyStyle}>{body}</div>
+      </div>
 
       {/* Byline */}
       <hr style={hrThin} />

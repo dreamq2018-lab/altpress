@@ -59,6 +59,20 @@ body {
     display: none !important;
   }
 
+  /* 색상 보존 — 기본적으로 브라우저는 인쇄 시 배경색을 벗겨버림 */
+  .thermal-masthead,
+  .thermal-body-area {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .thermal-masthead {
+    background-color: #1b3a6b !important;
+    color: #ffffff !important;
+  }
+  .thermal-body-area {
+    background-color: #f5f5f5 !important;
+  }
+
   /* body·print-area 둘레의 여백·그림자·배경 모두 제거 */
   html,
   body {
