@@ -60,10 +60,14 @@ body {
   }
 
   /* 색상 보존 — 기본적으로 브라우저는 인쇄 시 배경색을 벗겨버림 */
+  .thermal-layout,
   .thermal-masthead,
   .thermal-body-area {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  .thermal-layout {
+    background-color: #f5f5f5 !important;
   }
   .thermal-masthead {
     background-color: #f5f5f5 !important;

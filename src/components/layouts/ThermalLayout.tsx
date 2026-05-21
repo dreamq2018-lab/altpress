@@ -18,11 +18,13 @@ interface ThermalLayoutProps {
 
 const wrapperStyle: CSSProperties = {
   width: '72mm',
-  background: '#ffffff',
+  background: '#F5F5F5',
   color: '#000000',
   padding: '4mm 3mm',
   fontFamily: FONT_GOTHIC,
   boxSizing: 'border-box',
+  WebkitPrintColorAdjust: 'exact',
+  printColorAdjust: 'exact',
 }
 
 const hrThin: CSSProperties = {
