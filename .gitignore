@@ -28,6 +28,14 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# altpress 개발용 잔재 — 테스트 fixture·스크린샷
+/test-*.json
+/test-*.png
+/admin-*.png
+/home-*.png
+/staff-*.png
+/qr-*.png
+
 # vercel
 .vercel
 

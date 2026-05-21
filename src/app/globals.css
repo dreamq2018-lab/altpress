@@ -25,3 +25,46 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Tabloid body — drop cap on the first letter */
+.tabloid-body-text::first-letter {
+  font-size: 2.5em;
+  font-weight: 800;
+  float: left;
+  line-height: 1;
+  margin: 0.05em 0.18em 0 0;
+  font-family: 'Nanum Myeongjo', serif;
+  color: #1B3A6B;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .thermal-layout {
+    width: 72mm !important;
+    page-break-after: always;
+  }
+
+  .thermal-fold-guide {
+    display: block !important;
+    border: none;
+    border-top: 0.5px dashed #000;
+    margin: 8mm 0;
+  }
+
+  .tabloid-layout {
+    width: 263mm !important;
+    page-break-after: always;
+  }
+
+  @page tabloid {
+    size: 279mm 432mm;
+    margin: 8mm;
+  }
+
+  .tabloid-layout {
+    page: tabloid;
+  }
+}
