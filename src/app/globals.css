@@ -37,16 +37,54 @@ body {
   color: #1B3A6B;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Print 전용 규칙
+   - thermal: 80mm 두루마리, 높이는 콘텐츠에 맞춰 연속 (페이지 분할 X)
+   - tabloid: 279×432mm 고정 페이지
+   ───────────────────────────────────────────────────────────── */
+
+@page thermal {
+  size: 80mm auto; /* 80mm 너비, 높이 자동 — 빈 2페이지 방지 */
+  margin: 0;
+}
+
+@page tabloid {
+  size: 279mm 432mm;
+  margin: 8mm;
+}
+
 @media print {
+  /* 화면용 컴포넌트 숨김 */
   .no-print {
     display: none !important;
   }
 
-  .thermal-layout {
-    width: 72mm !important;
-    page-break-after: always;
+  /* body·print-area 둘레의 여백·그림자·배경 모두 제거 */
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  #print-area {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    display: block !important;
   }
 
+  /* Thermal — 80mm 페이지에 한 줄로 연속 출력 */
+  .thermal-layout {
+    width: 72mm !important;
+    margin: 0 auto !important;
+    page: thermal;
+    page-break-after: auto;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
   .thermal-fold-guide {
     display: block !important;
     border: none;
@@ -54,17 +92,11 @@ body {
     margin: 8mm 0;
   }
 
+  /* Tabloid */
   .tabloid-layout {
     width: 263mm !important;
-    page-break-after: always;
-  }
-
-  @page tabloid {
-    size: 279mm 432mm;
-    margin: 8mm;
-  }
-
-  .tabloid-layout {
+    margin: 0 auto !important;
     page: tabloid;
+    page-break-after: auto;
   }
 }
