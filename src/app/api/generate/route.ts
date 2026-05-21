@@ -101,6 +101,7 @@ export async function POST(req: NextRequest) {
     response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1000,
+      stream: false, // 명시 — Message | Stream 유니온에서 Message로 좁힘
       system: [
         {
           type: 'text',
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
           schema: ARTICLE_SCHEMA,
         },
       },
-    } as Parameters<typeof client.messages.create>[0])
+    })
   } catch (error) {
     if (error instanceof Anthropic.APIError) {
       return NextResponse.json(
