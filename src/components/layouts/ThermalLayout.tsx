@@ -43,8 +43,10 @@ const mastheadStyle: CSSProperties = {
   textAlign: 'center',
   fontFamily: FONT_MYEONGJO,
   padding: '8px 6px',
-  background: '#1B3A6B',
-  color: '#FFFFFF',
+  background: '#F5F5F5',
+  color: '#000000',
+  borderTop: '2px solid #000000',
+  borderBottom: '2px solid #000000',
   WebkitPrintColorAdjust: 'exact',
   printColorAdjust: 'exact',
 }
@@ -54,7 +56,7 @@ const mastTitleStyle: CSSProperties = {
   letterSpacing: '0.5px',
   lineHeight: 1.1,
   margin: 0,
-  color: '#FFFFFF',
+  color: '#000000',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -94,7 +96,7 @@ const mastSubStyle: CSSProperties = {
   fontSize: '8px',
   lineHeight: 1.4,
   marginTop: '1.5mm',
-  color: 'rgba(255,255,255,0.92)',
+  color: 'rgba(0,0,0,0.75)',
 }
 
 const typeBadgeStyle: CSSProperties = {
