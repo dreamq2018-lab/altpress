@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 interface AdminShellProps {
   title: string
@@ -52,20 +51,12 @@ const navLinkStyle: CSSProperties = {
   opacity: 0.8,
 }
 
-const userBoxStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-  fontSize: 13,
-  color: 'rgba(255,255,255,0.85)',
-}
-
 const logoutBtnStyle: CSSProperties = {
   background: 'transparent',
   color: '#fff',
   border: '1px solid rgba(255,255,255,0.4)',
   borderRadius: 4,
-  padding: '4px 10px',
+  padding: '4px 12px',
   fontSize: 12,
   cursor: 'pointer',
   fontFamily: 'inherit',
@@ -101,20 +92,15 @@ export default function AdminShell({
   children,
 }: AdminShellProps) {
   const router = useRouter()
-  const [email, setEmail] = useState<string | null>(null)
   const [signingOut, setSigningOut] = useState(false)
-
-  useEffect(() => {
-    const supabase = createSupabaseBrowserClient()
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null)
-    })
-  }, [])
 
   const onLogout = async () => {
     setSigningOut(true)
-    const supabase = createSupabaseBrowserClient()
-    await supabase.auth.signOut()
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' })
+    } catch {
+      // ignore
+    }
     router.push('/admin/login')
     router.refresh()
   }
@@ -136,17 +122,14 @@ export default function AdminShell({
             </Link>
           </nav>
         </div>
-        <div style={userBoxStyle}>
-          {email && <span>👤 {email}</span>}
-          <button
-            type="button"
-            style={logoutBtnStyle}
-            onClick={onLogout}
-            disabled={signingOut}
-          >
-            {signingOut ? '로그아웃 중…' : '로그아웃'}
-          </button>
-        </div>
+        <button
+          type="button"
+          style={logoutBtnStyle}
+          onClick={onLogout}
+          disabled={signingOut}
+        >
+          {signingOut ? '로그아웃 중…' : '로그아웃'}
+        </button>
       </header>
       <div style={titleBarStyle}>
         <div style={titleStyle}>{title}</div>

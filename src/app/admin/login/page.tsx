@@ -1,9 +1,8 @@
 'use client'
 
 import { Suspense, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { CSSProperties, FormEvent } from 'react'
-import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 const NAVY = '#1B3A6B'
 
@@ -22,7 +21,7 @@ const cardStyle: CSSProperties = {
   borderRadius: 12,
   padding: '40px 32px',
   width: '100%',
-  maxWidth: 420,
+  maxWidth: 380,
   border: `2px solid ${NAVY}`,
   boxShadow: '0 4px 16px rgba(27,58,107,0.12)',
   textAlign: 'center',
@@ -78,55 +77,53 @@ const buttonStyle = (enabled: boolean): CSSProperties => ({
   minHeight: 52,
 })
 
-const noticeStyle = (variant: 'success' | 'error'): CSSProperties => ({
+const errorStyle: CSSProperties = {
   marginTop: 16,
   padding: '12px 14px',
-  background: variant === 'success' ? '#e6f4ea' : '#fff4f4',
-  border: `1px solid ${variant === 'success' ? '#0a8043' : '#d33'}`,
+  background: '#fff4f4',
+  border: '1px solid #d33',
   borderRadius: 6,
-  color: variant === 'success' ? '#0a5d31' : '#a00',
+  color: '#a00',
   fontSize: 13,
-  lineHeight: 1.5,
-})
-
-const hintStyle: CSSProperties = {
-  marginTop: 20,
-  fontSize: 11,
-  color: '#aaa',
   lineHeight: 1.5,
 }
 
 function LoginInner() {
+  const router = useRouter()
   const params = useSearchParams()
   const next = params.get('next') || '/admin'
   const urlError = params.get('error')
 
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle')
-  const [error, setError] = useState<string | null>(urlError)
+  const [password, setPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(
+    urlError === 'server_misconfigured'
+      ? '서버에 ADMIN_PASSWORD 환경변수가 설정되지 않았습니다. Vercel 설정을 확인해주세요.'
+      : null,
+  )
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const trimmed = email.trim()
-    if (!trimmed) return
-    setStatus('sending')
+    if (!password) return
+    setSubmitting(true)
     setError(null)
 
     try {
-      const supabase = createSupabaseBrowserClient()
-      const origin = window.location.origin
-      const { error: signInError } = await supabase.auth.signInWithOtp({
-        email: trimmed,
-        options: {
-          emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-        },
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
       })
-      if (signInError) throw signInError
-      setStatus('sent')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(data.error || `HTTP ${res.status}`)
+      }
+      router.push(next)
+      router.refresh()
     } catch (e) {
       const msg = e instanceof Error ? e.message : '알 수 없는 오류'
       setError(msg)
-      setStatus('idle')
+      setSubmitting(false)
     }
   }
 
@@ -134,48 +131,32 @@ function LoginInner() {
     <main style={pageStyle}>
       <div style={cardStyle}>
         <div style={titleStyle}>관리자 로그인</div>
-        <div style={subtitleStyle}>등록된 관리자 이메일로 매직 링크를 보내드립니다</div>
+        <div style={subtitleStyle}>관리자 비밀번호를 입력해주세요</div>
 
-        {status === 'sent' ? (
-          <div style={noticeStyle('success')}>
-            ✓ <strong>{email}</strong> 으로 로그인 링크를 보냈습니다.
-            <br />
-            메일을 확인하고 링크를 클릭하면 자동으로 로그인됩니다.
-          </div>
-        ) : (
-          <form onSubmit={onSubmit}>
-            <label style={labelStyle} htmlFor="email">
-              이메일
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              style={inputStyle}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.com"
-              disabled={status === 'sending'}
-            />
-            <button
-              type="submit"
-              style={buttonStyle(
-                email.trim().length > 0 && status === 'idle',
-              )}
-              disabled={status === 'sending' || email.trim().length === 0}
-            >
-              {status === 'sending' ? '전송 중…' : '로그인 링크 보내기'}
-            </button>
-            {error && <div style={noticeStyle('error')}>⚠ {error}</div>}
-          </form>
-        )}
-
-        <div style={hintStyle}>
-          허용된 이메일만 관리자 페이지에 접근할 수 있습니다.
-          <br />
-          비허용 이메일로 로그인은 가능하지만 관리자 페이지는 보이지 않습니다.
-        </div>
+        <form onSubmit={onSubmit}>
+          <label style={labelStyle} htmlFor="password">
+            비밀번호
+          </label>
+          <input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            autoFocus
+            style={inputStyle}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={submitting}
+          />
+          <button
+            type="submit"
+            style={buttonStyle(password.length > 0 && !submitting)}
+            disabled={submitting || password.length === 0}
+          >
+            {submitting ? '로그인 중…' : '로그인'}
+          </button>
+          {error && <div style={errorStyle}>⚠ {error}</div>}
+        </form>
       </div>
     </main>
   )

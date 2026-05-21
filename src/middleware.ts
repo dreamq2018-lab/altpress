@@ -1,45 +1,27 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isAdminEmail } from '@/lib/auth'
 
-export async function middleware(req: NextRequest) {
+const COOKIE_NAME = 'altpress_admin'
+
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // /admin/* 외엔 모두 통과
+  // /admin/* 외엔 통과
   if (!pathname.startsWith('/admin')) return NextResponse.next()
-  // 로그인 페이지 자체는 인증 검사 면제
+  // 로그인 페이지·로그인 API는 인증 검사 면제
   if (pathname === '/admin/login' || pathname.startsWith('/admin/login/')) {
     return NextResponse.next()
   }
 
-  const res = NextResponse.next({ request: { headers: req.headers } })
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key) {
-    // Supabase가 설정 안 되어 있으면 로그인 페이지로 보냄
-    return NextResponse.redirect(new URL('/admin/login', req.url))
+  const expected = process.env.ADMIN_PASSWORD
+  if (!expected) {
+    // env가 설정 안 되면 안전하게 차단
+    return NextResponse.redirect(
+      new URL('/admin/login?error=server_misconfigured', req.url),
+    )
   }
 
-  const supabase = createServerClient(url, key, {
-    cookies: {
-      get(name: string) {
-        return req.cookies.get(name)?.value
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        res.cookies.set({ name, value, ...options })
-      },
-      remove(name: string, options: CookieOptions) {
-        res.cookies.set({ name, value: '', ...options })
-      },
-    },
-  })
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user || !isAdminEmail(user.email)) {
+  const cookieValue = req.cookies.get(COOKIE_NAME)?.value
+  if (cookieValue !== expected) {
     const loginUrl = new URL('/admin/login', req.url)
     if (pathname !== '/admin') {
       loginUrl.searchParams.set('next', pathname)
@@ -47,7 +29,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  return res
+  return NextResponse.next()
 }
 
 export const config = {
