@@ -46,11 +46,27 @@ const mastheadStyle: CSSProperties = {
 }
 
 const mastTitleStyle: CSSProperties = {
-  fontSize: '26px',
   fontWeight: 800,
   letterSpacing: '0.5px',
   lineHeight: 1.1,
   margin: 0,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+}
+
+// 72mm 폭에 한 줄로 들어가도록 글자 수 기반으로 폰트 크기 결정
+// CJK 1.0 / 공백 0.4 / 라틴·숫자 0.55 가중치
+function computeMastFontSize(text: string): number {
+  if (!text) return 26
+  const visual = Array.from(text).reduce((sum, ch) => {
+    if (/\s/.test(ch)) return sum + 0.4
+    if (/[一-鿿가-힯぀-ヿ]/.test(ch)) return sum + 1.0
+    return sum + 0.55
+  }, 0)
+  const AVAILABLE_PX = 240 // 72mm - 양옆 패딩 후 가용 폭 추정
+  const computed = Math.floor((AVAILABLE_PX / visual) * 0.95)
+  return Math.max(12, Math.min(26, computed))
 }
 
 const mastSubStyle: CSSProperties = {
@@ -243,7 +259,14 @@ export default function ThermalLayout({
       {/* Masthead */}
       <div style={doubleRuleStyle} />
       <header style={mastheadStyle}>
-        <h1 style={mastTitleStyle}>
+        <h1
+          style={{
+            ...mastTitleStyle,
+            fontSize: `${computeMastFontSize(
+              `${mediaNameHanja ? mediaNameHanja + ' ' : ''}${mediaName}`,
+            )}px`,
+          }}
+        >
           {mediaNameHanja ? `${mediaNameHanja} ` : ''}
           {mediaName}
         </h1>
